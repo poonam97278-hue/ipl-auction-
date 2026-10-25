@@ -1,0 +1,331 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SANVIBYTES IPL Auction</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial;background:radial-gradient(circle at top,#21466c,#070c18 65%);color:white;min-height:100vh}
+header{padding:18px;text-align:center;background:#08111feF;border-bottom:1px solid #304665}
+header h1{margin:0;color:#ffc857;letter-spacing:2px}
+header p{color:#a9bdd7;margin:8px 0 0;font-size:12px}
+main{max-width:1100px;margin:auto;padding:20px}
+.screen{display:none}.screen.active{display:block}
+.panel{background:#121e32;border:1px solid #2b405e;border-radius:18px;padding:20px;margin-bottom:18px}
+h2{margin-top:0}
+input{width:100%;padding:13px;background:#091323;border:1px solid #405675;border-radius:10px;color:white;margin:8px 0 14px}
+label{color:#c5d5eb;font-size:14px}
+button{padding:12px 15px;border:0;border-radius:10px;font-weight:bold;cursor:pointer;transition:.2s}
+button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.gold{color:#ffc857}
+.primary{background:#ffc857;color:#171208}
+.green{background:#28dca0;color:#06251a}
+.blue{background:#274a72;color:white}
+.red{background:#692d40;color:white}
+.full{width:100%;margin-top:8px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{background:#0b1526;padding:14px;border-radius:12px;border:1px solid #293d59}
+.stat small{display:block;color:#91a9c8;margin-bottom:8px}
+.stat strong{font-size:22px}
+.player{background:linear-gradient(150deg,#1a3150,#0b1425);border:1px solid #405a7a;border-radius:18px;overflow:hidden;text-align:center}
+.player img{width:100%;height:240px;object-fit:contain;object-position:center bottom;background:radial-gradient(circle,#385e85,#101b30);display:block}
+.player-info{padding:16px}
+.role{display:inline-block;background:#254464;color:#9fe3ff;padding:7px 11px;border-radius:30px;font-size:12px}
+.price{font-size:32px;color:#ffc857;font-weight:900;margin:10px 0}
+.turn{border:1px solid #ffc857;background:#302819;padding:15px;border-radius:12px;text-align:center;margin-bottom:16px}
+.log{max-height:200px;overflow:auto;font-size:13px;color:#c5d5eb}
+.log div{padding:9px;border-bottom:1px solid #29364c}
+.team{background:#0b1526;border-radius:12px;padding:14px;margin:10px 0}
+.muted{color:#9aafca;font-size:13px;line-height:1.6}
+.hidden{display:none!important}
+@media(max-width:650px){main{padding:12px}.row{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.player img{height:200px}.panel{padding:14px}.stat strong{font-size:18px}}
+</style>
+</head>
+<body>
+<header>
+<h1>🏏 SANVIBYTES</h1>
+<p>IPL AUCTION SIMULATOR • TWO PLAYER MODE</p>
+</header>
+
+<main>
+<section id="setup" class="screen active">
+<div class="panel" style="text-align:center;padding:30px 20px">
+<h1 class="gold">🏆 IPL AUCTION</h1>
+<p class="muted">Two players. One device. Build your dream cricket squad!</p>
+</div>
+<div class="panel">
+<h2>👥 Create Your Teams</h2>
+<div class="row">
+<div>
+<label>Player 1 Team Name</label>
+<input id="name1" value="Kevin Team" maxlength="25">
+</div>
+<div>
+<label>Player 2 Team Name</label>
+<input id="name2" value="Karm Team" maxlength="25">
+</div>
+</div>
+<label>Starting Purse (₹ lakh per team)</label>
+<input id="budget" type="number" min="10" max="1000" value="100">
+<p class="muted">દરેક ટીમને અલગ બજેટ મળશે. ખેલાડીઓની શરૂઆતની કિંમત ₹1 લાખ રહેશે.</p>
+<button class="primary full" onclick="startGame()">🚀 START AUCTION</button>
+</div>
+</section>
+
+<section id="game" class="screen">
+<div class="cards">
+<div class="stat"><small>PLAYER 1</small><strong id="sname1">Kevin Team</strong><p class="gold" id="cash1">₹100 lakh</p><small id="count1">0 players</small></div>
+<div class="stat"><small>PLAYER 2</small><strong id="sname2">Karm Team</strong><p class="gold" id="cash2">₹100 lakh</p><small id="count2">0 players</small></div>
+<div class="stat"><small>AUCTION PROGRESS</small><strong id="progress">1 / 30</strong><p class="muted">Base price: ₹1 lakh</p></div>
+</div>
+
+<div class="turn">
+<div class="muted">CURRENT TURN</div>
+<h2 id="turnName" class="gold">Kevin Team</h2>
+<div id="turnMessage">Place a bid or pass.</div>
+</div>
+
+<div class="row">
+<div class="player">
+<img id="photo" src="https://documents.iplt20.com/ipl/IPLHeadshot2025/3869.png" alt="Cricket player" onerror="this.onerror=null;this.src='https://documents.iplt20.com/ipl/IPLHeadshot2022/1124.png'">
+<div class="player-info">
+<span id="role" class="role">BATSMAN</span>
+<h2 id="pname">Rohit Sharma</h2>
+<p id="country" class="muted">India</p>
+<p class="muted">BASE PRICE</p>
+<div class="price">₹1 LAKH</div>
+<hr style="border-color:#30435e">
+<p class="muted">CURRENT HIGHEST BID</p>
+<div id="bidPrice" class="price">₹1 lakh</div>
+<h3 id="highest">No bids yet</h3>
+</div>
+</div>
+
+<div>
+<div class="panel">
+<h2>🔨 Live Bidding</h2>
+<p class="muted">દરેક નવી બોલી ₹1 લાખ વધશે. બંને ખેલાડીઓ વારાફરતી નિર્ણય લેશે.</p>
+<button id="bidBtn" class="green full" onclick="placeBid()">🔨 BID + ₹1 LAKH</button>
+<button id="passBtn" class="blue full" onclick="passTurn()">PASS / WAIT</button>
+<button id="sellBtn" class="primary full" onclick="sellPlayer()" disabled>🔔 SOLD / UNSOLD</button>
+<button id="nextBtn" class="blue full" onclick="nextPlayer()" disabled>NEXT PLAYER ➜</button>
+</div>
+<div class="panel">
+<h3>📡 Auction Activity</h3>
+<div id="log" class="log"></div>
+</div>
+</div>
+</div>
+
+<div class="panel">
+<h2>📊 Team Reports</h2>
+<div class="row">
+<div class="team"><h3 id="reportName1">Kevin Team</h3><p id="report1" class="muted">No players purchased yet.</p></div>
+<div class="team"><h3 id="reportName2">Karm Team</h3><p id="report2" class="muted">No players purchased yet.</p></div>
+</div>
+</div>
+</section>
+
+<section id="finish" class="screen">
+<div class="panel">
+<h1 class="gold">🏆 AUCTION COMPLETED!</h1>
+<div id="finalReports"></div>
+<button class="primary full" onclick="location.reload()">🔄 NEW AUCTION</button>
+</div>
+</section>
+</main>
+
+<script>
+const photoURLs={
+"Rohit Sharma":"https://documents.iplt20.com/ipl/IPLHeadshot2025/3869.png",
+"Jasprit Bumrah":"https://documents.iplt20.com/ipl/IPLHeadshot2022/1124.png"
+};
+
+const originalPlayers=[
+["Rohit Sharma","Batsman","India","🏏"],
+["Virat Kohli","Batsman","India","🏏"],
+["Jasprit Bumrah","Bowler","India","🎯"],
+["Hardik Pandya","All-Rounder","India","⚡"],
+["Ravindra Jadeja","All-Rounder","India","⚡"],
+["MS Dhoni","Wicket-Keeper","India","🧤"],
+["Shubman Gill","Batsman","India","🏏"],
+["Suryakumar Yadav","Batsman","India","🏏"],
+["Rishabh Pant","Wicket-Keeper","India","🧤"],
+["KL Rahul","Wicket-Keeper","India","🧤"],
+["Yashasvi Jaiswal","Batsman","India","🏏"],
+["Ruturaj Gaikwad","Batsman","India","🏏"],
+["Mohammed Siraj","Bowler","India","🎯"],
+["Arshdeep Singh","Bowler","India","🎯"],
+["Kuldeep Yadav","Bowler","India","🎯"],
+["Axar Patel","All-Rounder","India","⚡"],
+["Sanju Samson","Wicket-Keeper","India","🧤"],
+["Shreyas Iyer","Batsman","India","🏏"],
+["Rinku Singh","Batsman","India","🏏"],
+["Rashid Khan","Bowler","Afghanistan","🎯"],
+["Trent Boult","Bowler","New Zealand","🎯"],
+["Jos Buttler","Wicket-Keeper","England","🧤"],
+["Glenn Maxwell","All-Rounder","Australia","⚡"],
+["Pat Cummins","Bowler","Australia","🎯"],
+["David Warner","Batsman","Australia","🏏"],
+["Mitchell Starc","Bowler","Australia","🎯"],
+["Sunil Narine","All-Rounder","West Indies","⚡"],
+["Andre Russell","All-Rounder","West Indies","⚡"],
+["Nicholas Pooran","Wicket-Keeper","West Indies","🧤"],
+["Phil Salt","Wicket-Keeper","England","🧤"]
+];
+
+let teams=[],pool=[],idx=0,price=1,highest=-1,passes=0,closed=false;
+const $=id=>document.getElementById(id);
+const money=n=>"₹"+n.toLocaleString("en-IN")+" lakh";
+
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+function startGame(){
+ const n1=$("name1").value.trim(),n2=$("name2").value.trim();
+ const budget=Number($("budget").value);
+ if(!n1||!n2||n1.toLowerCase()===n2.toLowerCase()){alert("બંને ટીમના અલગ નામ લખો.");return}
+ if(!Number.isFinite(budget)||budget<10||budget>1000){alert("Budget ₹10 થી ₹1000 lakh વચ્ચે રાખો.");return}
+ teams=[
+ {name:n1,budget:budget,purse:budget,squad:[]},
+ {name:n2,budget:budget,purse:budget,squad:[]}
+ ];
+ pool=originalPlayers.map(p=>({name:p[0],role:p[1],country:p[2],icon:p[3]})).sort(()=>Math.random()-.5);
+ idx=0;
+ $("setup").classList.remove("active");
+ $("game").classList.add("active");
+ addLog("Auction started! Welcome "+n1+" and "+n2+".");
+ loadPlayer();
+}
+
+function addLog(s){
+ const d=document.createElement("div");
+ d.textContent=s;
+ $("log").prepend(d);
+}
+function currentPlayer(){return pool[idx]}
+function loadPlayer(){
+ if(idx>=pool.length){finish();return}
+ price=1;highest=-1;passes=0;closed=false;
+ const p=currentPlayer();
+ $("pname").textContent=p.name;
+ $("role").textContent=p.role.toUpperCase();
+ $("country").textContent=p.country+" • "+p.role;
+ $("photo").src=photoURLs[p.name]||"";
+ $("photo").onerror=function(){
+  this.onerror=null;
+  this.style.objectFit="contain";
+  this.src="https://documents.iplt20.com/ipl/IPLHeadshot2022/1124.png";
+ };
+ // If a headshot is not available, retain a visible player label and role.
+ $("progress").textContent=(idx+1)+" / "+pool.length;
+ $("bidPrice").textContent=money(price);
+ $("highest").textContent="No bids yet";
+ $("turnMessage").textContent="Place a bid or pass.";
+ $("bidBtn").disabled=false;
+ $("passBtn").disabled=false;
+ $("sellBtn").disabled=true;
+ $("nextBtn").disabled=true;
+ update();
+}
+
+function whoseTurn(){
+ return passes%2;
+}
+function placeBid(){
+ if(closed)return;
+ const t=teams[whoseTurn()];
+ if(t.purse<price+1){alert(t.name+" પાસે પૂરતું બજેટ નથી. Pass કરો.");return}
+ price+=1;
+ highest=whoseTurn();
+ passes=0;
+ $("bidPrice").textContent=money(price);
+ $("highest").textContent=teams[highest].name;
+ $("turnMessage").textContent=teams[1-highest].name+" નો વારો છે. બોલી વધારશો કે Pass કરશો?";
+ addLog(teams[highest].name+" bids "+money(price)+" for "+currentPlayer().name);
+ update();
+}
+
+function passTurn(){
+ if(closed)return;
+ const t=teams[whoseTurn()];
+ passes++;
+ addLog(t.name+" passes.");
+ if(passes>=2){
+  $("turnMessage").textContent="બંને ટીમોએ Pass કર્યું. હવે SOLD / UNSOLD દબાવો.";
+  $("bidBtn").disabled=true;
+  $("passBtn").disabled=true;
+  $("sellBtn").disabled=false;
+  return;
+ }
+ $("turnMessage").textContent=teams[whoseTurn()].name+" નો વારો છે.";
+ update();
+}
+
+function sellPlayer(){
+ if(closed)return;
+ closed=true;
+ const p=currentPlayer();
+ if(highest>=0){
+  const t=teams[highest];
+  if(t.purse>=price){
+   t.purse-=price;
+   t.squad.push({...p,price:price});
+   addLog("SOLD! "+p.name+" → "+t.name+" for "+money(price));
+  }else{
+   addLog(p.name+" unsold: not enough purse.");
+  }
+ }else{
+  addLog(p.name+" went unsold.");
+ }
+ $("bidBtn").disabled=true;
+ $("passBtn").disabled=true;
+ $("sellBtn").disabled=true;
+ $("nextBtn").disabled=false;
+ $("turnMessage").textContent=highest>=0?"Player sold! View Team Reports below.":"Player unsold.";
+ update();
+}
+
+function nextPlayer(){
+ if(!closed)return;
+ idx++;
+ loadPlayer();
+}
+
+function update(){
+ teams.forEach((t,i)=>{
+  $("sname"+(i+1)).textContent=t.name;
+  $("cash"+(i+1)).textContent=money(t.purse);
+  $("count"+(i+1)).textContent=t.squad.length+" players";
+  $("reportName"+(i+1)).textContent=t.name;
+  $("report"+(i+1)).innerHTML=t.squad.length?
+   t.squad.map(p=>safe(p.name)+" — "+safe(p.role)+" — "+money(p.price)).join("<br>")+
+   "<hr>Total spent: "+money(t.budget-t.purse)+"<br>Remaining: "+money(t.purse):
+   "No players purchased yet.<br>Spent: "+money(t.budget-t.purse)+"<br>Remaining: "+money(t.purse);
+ });
+ if(!closed){
+  const t=teams[whoseTurn()];
+  $("turnName").textContent=t.name;
+  $("bidBtn").disabled=t.purse<price+1;
+  $("passBtn").disabled=false;
+  $("sellBtn").disabled=true;
+ }
+}
+function finish(){
+ $("game").classList.remove("active");
+ $("finish").classList.add("active");
+ $("finalReports").innerHTML=teams.map(t=>`
+ <div class="panel">
+ <h2>${safe(t.name)}</h2>
+ <p class="gold">Remaining purse: ${money(t.purse)}</p>
+ <p>Total spent: ${money(t.budget-t.purse)}</p>
+ <p>Players bought: ${t.squad.length}</p>
+ ${t.squad.length?t.squad.map(p=>`<div class="team">${p.icon} <b>${safe(p.name)}</b><br><span class="muted">${safe(p.role)} • ${money(p.price)}</span></div>`).join(""):"No players bought."}
+ </div>`).join("");
+}
+</script>
+</body>
+</html>
